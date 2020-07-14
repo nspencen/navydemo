@@ -7,7 +7,6 @@ Created on Tue Jun 30 18:51:12 2020
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from bokeh.io import output_file, show, curdoc
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, CategoricalColorMapper, FactorRange, HoverTool, Select, Legend
@@ -258,7 +257,6 @@ third = Panel(child=gridplot([[p9,p11,widgetbox(select3, width=180)], [p10, p12,
 tabs = Tabs(tabs = [first, second, third])
 
 curdoc().add_root(tabs)
-#output_file('test.html')
-#show(tabs)
+
 
   
