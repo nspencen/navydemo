@@ -9,11 +9,14 @@ import numpy as np
 import pandas as pd
 from bokeh.io import output_file, show, curdoc
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, CategoricalColorMapper, FactorRange, HoverTool, Select, Legend
+from bokeh.models import (ColumnDataSource, CategoricalColorMapper, 
+                          FactorRange, HoverTool, Select, Legend)
 from bokeh.models.widgets import Panel, Tabs
 from bokeh.palettes import Viridis7, BuPu3, Oranges3, RdYlGn7, Blues7
 from bokeh.layouts import widgetbox, column, row, gridplot
 from bokeh.transform import dodge
+from bokeh.models.widgets.tables import (
+                          DataTable, TableColumn, IntEditor)
 
 def createDataList(sDF, rankNames, cat, catContent):
     valList = []
@@ -133,12 +136,51 @@ p3.title.text_font_size = '8pt';p4.title.text_font_size = '8pt'
 p1.add_tools(hoverRace); p2.add_tools(hoverRace)
 p3.add_tools(hoverRace); p4.add_tools(hoverRace)
 
+dictDT1 = {
+    'RankNames': ['E1: Seaman Recruit', 'E2: Seaman Apprentice', 'E3: Seaman', 'E4: Petty Officer 3rd Class', 
+             'E5: Petty Officer 2nd Class', 'E6: Petty Officer 1st Class', 'E7: Chief Petty Officer',
+             'E8: Senior Chief Petty Officer', 'E9: Master Chief Petty Officer']
+}
+dictDT2 = {
+    'RankNames': ['O1: Ensign', 'O2: Lieutenant Junior Grade', 'O3: Lieutenant', 'O4: Lieutenant Commander', 
+             'O5: Commander', 'O6: Captain', 'O7: Rear Admiral (lower half)',
+             'O8: Rear Admiral (upper half)', 'O9: Vice Admiral', 'O10: Admiral']
+}
+dictDT3 = {
+    'RankNames': ['CWO2: Chief Warrant Officer', 'CWO3: Chief Warrant Officer',  
+                  'CWO4: Chief Warrant Officer', 'CWO5: Chief Warrant Officer']
+             
+}
+
+sourceDT1 = ColumnDataSource(data=dictDT1)
+sourceDT2 = ColumnDataSource(data=dictDT1)
+sourceDT3 = ColumnDataSource(data=dictDT1)
+columnsDT = [
+    TableColumn(field="RankNames", title="Rank")
+]
+data_table1 = DataTable(
+    source=sourceDT1, columns=columnsDT, width = 170, editable=True, reorderable=False,
+    index_position=None
+)
+data_table2 = DataTable(
+    source=sourceDT2, columns=columnsDT, width = 170, editable=True, reorderable=False,
+    index_position=None
+)
+data_table3 = DataTable(
+    source=sourceDT3, columns=columnsDT, width = 170, editable=True, reorderable=False,
+    index_position=None
+)
+
+
+
 def callback1(attr, old, new):
-    newRanks = enlistedRanks
+    newRanks = enlistedRanks; sourceDT1.data = dictDT1
     if select1.value == 'Warrant Officer Ranks':
         newRanks = warrantRanks
+        sourceDT1.data = dictDT3
     elif select1.value == 'Officer Ranks':
         newRanks = officerRanks
+        sourceDT1.data = dictDT2
         
     p1.x_range.factors = newRanks 
     new_data1 = createCountSource(df2019, newRanks, 'race', raceNames)
@@ -153,12 +195,15 @@ def callback1(attr, old, new):
     new_data4 = createPercentSource(df2020, newRanks, 'race', raceNames)
     source4.data = new_data4
     
+    
 def callback2(attr, old, new):
-    newRanks = enlistedRanks
+    newRanks = enlistedRanks; sourceDT2.data = dictDT1
     if select2.value == 'Warrant Officer Ranks':
         newRanks = warrantRanks
+        sourceDT2.data = dictDT3
     elif select2.value == 'Officer Ranks':
         newRanks = officerRanks
+        sourceDT2.data = dictDT2
         
     p5.x_range.factors = newRanks 
     new_data5 = createCountSource(df2019, newRanks, 'sex', genderNames)
@@ -174,11 +219,13 @@ def callback2(attr, old, new):
     source8.data = new_data8 
     
 def callback3(attr, old, new):
-    newRanks = enlistedRanks
+    newRanks = enlistedRanks; sourceDT3.data = dictDT1
     if select3.value == 'Warrant Officer Ranks':
         newRanks = warrantRanks
+        sourceDT3.data = dictDT3
     elif select3.value == 'Officer Ranks':
         newRanks = officerRanks
+        sourceDT3.data = dictDT2
         
     p9.x_range.factors = newRanks 
     new_data9 = createCountSource(df2019, newRanks, 'ethnicity', ethnicNames)
@@ -251,12 +298,13 @@ hoverEthnicity = HoverTool(tooltips=[
 p9.add_tools(hoverEthnicity); p10.add_tools(hoverEthnicity)
 p11.add_tools(hoverEthnicity); p12.add_tools(hoverEthnicity)  
 
-first = Panel(child=gridplot([[p1,p3,widgetbox(select1, width=180)], [p2,p4,]]), title='Race')
-second = Panel(child=gridplot([[p5,p7,widgetbox(select2, width=180)], [p6, p8,]]), title='Gender')
-third = Panel(child=gridplot([[p9,p11,widgetbox(select3, width=180)], [p10, p12,]]), title='Ethnicity')
+first = Panel(child=gridplot([[p1,p3,widgetbox(select1, width=180)], [p2,p4,widgetbox(data_table1)]]), title='Race')
+second = Panel(child=gridplot([[p5,p7,widgetbox(select2, width=180)], [p6,p8,widgetbox(data_table2)]]), title='Gender')
+third = Panel(child=gridplot([[p9,p11,widgetbox(select3, width=180)], [p10,p12,widgetbox(data_table3)]]), title='Ethnicity')
 tabs = Tabs(tabs = [first, second, third])
 
 curdoc().add_root(tabs)
+curdoc().title = "Navy Demographic Data"
 
 
   
