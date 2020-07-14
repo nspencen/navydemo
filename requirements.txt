@@ -3,3 +3,4 @@ numpy
 matplotlib
 pymc3
 bokeh
+gunicorn
